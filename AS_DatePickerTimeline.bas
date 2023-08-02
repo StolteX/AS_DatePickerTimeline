@@ -51,6 +51,11 @@ V1.13
 	-Scroll2Date BugFix
 V1.14
 	-Add compatibility for AS_ViewPager Version 2.0
+V1.15
+	-ListMode List
+		-Completely rewritten logic
+		-Each day now has its own slot, instead of always adding 1 week to the list
+		-MinDate and MaxDate can now be used in a more targeted manner
 #End If
 
 #DesignerProperty: Key: ListMode, DisplayName: List Mode, FieldType: String, DefaultValue: Paging, List: Paging|List
@@ -252,7 +257,7 @@ End Sub
 
 Private Sub AddWeeks
 	
-	Dim YearGap As Int = 5
+	Dim YearGap As Int = 3
 	#If Debug
 	YearGap = 1
 	#End If
@@ -264,54 +269,94 @@ Private Sub AddWeeks
 		StartDate =	m_MinDate
 	End If
 	
-	Dim FirstDay As Long = GetFirstDayOfWeek2(StartDate,m_FirstDayOfWeek)
-	
-	Dim p2 As Period
-	p2.Initialize
-	p2.Days = -7
-	
-	Dim LastStartDay As Long = DateUtils.AddPeriod(FirstDay,p2)'FirstDay - (DateTime.TicksPerDay*7)
-	
-	Dim WeekCount As Int
-	
-	If m_MaxDate = 0 Then
-		WeekCount = NumberOfWeeksBetween(StartDate,DateUtils.SetDate(DateTime.GetYear(m_StartDate)+YearGap,12,31))
-	Else
-		Dim WeeksBetween As Int = NumberOfWeeksBetween(FirstDay,GetFirstDayOfWeek2(m_MaxDate,m_FirstDayOfWeek)+DateTime.TicksPerDay*4)
-		WeekCount = Max(IIf(WeeksBetween = 0,WeeksBetween +1,WeeksBetween),1)
-	End If
-	
 	Dim StartIndex As Int = 0
 	
-	Dim StartDateFirstDay As Long = GetFirstDayOfWeek2(m_StartDate,m_FirstDayOfWeek)
+	If m_ListMode = "Paging" Then
 	
-	For i = 0 To WeekCount -1
+		Dim FirstDay As Long = GetFirstDayOfWeek2(StartDate,m_FirstDayOfWeek)
 	
-	Dim p As Period
-	p.Initialize
-	p.Days = 7
-		'Dim CurrentWeek As Long = LastStartDay + (DateTime.TicksPerDay*7) 'FirstDay + (DateTime.TicksPerDay*7)*i
-		Dim CurrentWeek As Long = DateUtils.AddPeriod(LastStartDay,p) 'FirstDay + (DateTime.TicksPerDay*7)*i
-		LastStartDay = CurrentWeek
+		Dim p2 As Period
+		p2.Initialize
+		p2.Days = -7
 	
-		Dim xpnl_Background As B4XView = xui.CreatePanel("")
-		xpnl_Background.Color = m_BodyColor
-		xpnl_Background.SetLayoutAnimated(0,0,0,xpnl_ListBackground.Width,xpnl_ListBackground.Height)
+		Dim LastStartDay As Long = DateUtils.AddPeriod(FirstDay,p2)'FirstDay - (DateTime.TicksPerDay*7)
+	
+		Dim WeekCount As Int
+	
+		If m_MaxDate = 0 Then
+			WeekCount = NumberOfWeeksBetween(StartDate,DateUtils.SetDate(DateTime.GetYear(m_StartDate)+YearGap,12,31))
+		Else
+			Dim WeeksBetween As Int = NumberOfWeeksBetween(FirstDay,GetFirstDayOfWeek2(m_MaxDate,m_FirstDayOfWeek)+DateTime.TicksPerDay*4)
+			WeekCount = Max(IIf(WeeksBetween = 0,WeeksBetween +1,WeeksBetween),1)
+		End If
+	
+	
+		Dim StartDateFirstDay As Long = GetFirstDayOfWeek2(m_StartDate,m_FirstDayOfWeek)
+	
+		For i = 0 To WeekCount -1
+	
+			Dim p As Period
+			p.Initialize
+			p.Days = 7
+			'Dim CurrentWeek As Long = LastStartDay + (DateTime.TicksPerDay*7) 'FirstDay + (DateTime.TicksPerDay*7)*i
+			Dim CurrentWeek As Long = DateUtils.AddPeriod(LastStartDay,p) 'FirstDay + (DateTime.TicksPerDay*7)*i
+			LastStartDay = CurrentWeek
+	
+			Dim xpnl_Background As B4XView = xui.CreatePanel("")
+			xpnl_Background.Color = m_BodyColor
+			xpnl_Background.SetLayoutAnimated(0,0,0,xpnl_ListBackground.Width,xpnl_ListBackground.Height)
 		
 '		Log(DateUtils.TicksToString(CurrentWeek))
 '		Log(DateUtils.TicksToString(StartDateFirstDay))
 		
-		If DateUtils.IsSameDay(CurrentWeek,StartDateFirstDay) Then
-			StartIndex = i
+			If DateUtils.IsSameDay(CurrentWeek,StartDateFirstDay) Then
+				StartIndex = i
+			End If
+		
+				xASVP_Main.AddPage(xpnl_Background,CurrentWeek)
+	
+		Next
+
+	Else
+		
+		Dim DayCount As Int
+	
+		If m_MaxDate = 0 Then			
+			DayCount = DateUtils.PeriodBetweenInDays(StartDate,DateUtils.SetDate(DateTime.GetYear(m_StartDate)+YearGap,12,31)).Days
+		Else
+			DayCount = Max(1,DateUtils.PeriodBetweenInDays(StartDate,m_MaxDate).Days) +1
 		End If
 		
-		If m_ListMode = "Paging" Then
-			xASVP_Main.AddPage(xpnl_Background,CurrentWeek)
-		Else
-			xclv_Main.Add(xpnl_Background,CurrentWeek)
-		End If
+		Dim LastStartDay As Long = StartDate
+		
+		For i = 0 To DayCount -1
+			
+			Dim p As Period
+			p.Initialize
+			p.Days = 1
+			
+			Dim CurrentWeek As Long = IIf(i = 0,LastStartDay, DateUtils.AddPeriod(LastStartDay,p))
+			LastStartDay = CurrentWeek
+			
+			Dim xpnl_Background As B4XView = xui.CreatePanel("")
+			xpnl_Background.Color = m_BodyColor
+			xpnl_Background.SetLayoutAnimated(0,0,0,mBase.Width/7,mBase.Height)
+			
+			If DateUtils.IsSameDay(CurrentWeek,m_StartDate) Then
+				StartIndex = i
+				StartIndex = StartIndex - DateTime.GetDayOfWeek(CurrentWeek) +1
+				StartIndex = IIf(StartIndex > DayCount,StartIndex -1,StartIndex)
+			End If
+		
+
+				xclv_Main.Add(xpnl_Background,CurrentWeek)
+
+			
+		Next
+
+	End If
 	
-	Next
+
 	
 	#If B4A
 	'Sleep(250)
@@ -321,7 +366,7 @@ Private Sub AddWeeks
 	If m_ListMode = "Paging" Then
 
 #If B4A
-		Do While xASVP_Main.CustomListView.FirstVisibleIndex = 0 And xASVP_Main.Size > 0
+		Do While xASVP_Main.CustomListView.FirstVisibleIndex = 0 And xASVP_Main.Size > 0 And StartIndex > 0
 			Sleep(0)
 			If xASVP_Main.Size > 0 Then	xASVP_Main.CurrentIndex2 = StartIndex
 		Loop
@@ -339,7 +384,7 @@ Private Sub AddWeeks
 		#Else
 		
 		#If B4A
-		Do While xclv_Main.sv.ScrollViewOffsetX = 0 And xclv_Main.Size > 0
+		Do While xclv_Main.sv.ScrollViewOffsetX = 0 And xclv_Main.Size > 0 And StartIndex > 0
 			Sleep(0)
 			xclv_Main.sv.ScrollViewOffsetX = xclv_Main.GetRawListItem(StartIndex).Offset
 		Loop
@@ -357,20 +402,38 @@ End Sub
 
 Private Sub AddWeek(Parent As B4XView,CurrentDate As Long)
 	
-	Dim BlockWidth As Float = Parent.Width/7
+	Dim BlockWidth As Float = IIf(m_ListMode = "Paging",Parent.Width/7,Parent.Width)
 	
 	Dim FirstDay As Long = GetFirstDayOfWeek2(CurrentDate,m_FirstDayOfWeek)
 	
 	'Dim CurrenMonth As Int = DateTime.GetMonth(CurrentDate)
 	
-	For i = 1 To 9 -1
+	Dim Looper As Int
+	If m_ListMode = "Paging" Then
+		Looper = 9
+	Else
+		Looper = 2
+	End If
+	
+	For i = 1 To Looper -1
 		
-		Dim CurrentDay As Long = FirstDay + DateTime.TicksPerDay*(i-1)
+		Dim CurrentDay As Long
+		
+		If m_ListMode = "Paging" Then
+			CurrentDay = FirstDay + DateTime.TicksPerDay*(i-1)
+		Else
+			CurrentDay = CurrentDate
+		End If
+		
 		
 		Dim xpnl_Date As B4XView = xui.CreatePanel("xpnl_WeekDay")
 		xpnl_Date.Tag = CurrentDay
 		xpnl_Date.Color = xui.Color_Transparent
-		Parent.AddView(xpnl_Date,BlockWidth*(i-1),0,BlockWidth,Parent.Height)
+		If m_ListMode = "Paging" Then
+			Parent.AddView(xpnl_Date,BlockWidth*(i-1),0,BlockWidth,Parent.Height)
+		Else
+			Parent.AddView(xpnl_Date,0,0,BlockWidth,Parent.Height)
+		End If
 		
 		
 		Dim xlbl_Date As B4XView = CreateLabel("")
@@ -722,7 +785,7 @@ Private Sub xpnl_WeekDay_Click
 End Sub
 
 Private Sub WeekDayClick(xpnl_WeekDay As B4XView,WithEvent As Boolean)
-	if m_Enabled = False then Return
+	If m_Enabled = False Then Return
 	Dim CurrentDay As Long = xpnl_WeekDay.Tag
 	If (m_MaxDate > 0 And DateUtils.SetDate(DateTime.GetYear(CurrentDay),DateTime.GetMonth(CurrentDay),DateTime.GetDayOfMonth(CurrentDay)) > DateUtils.SetDate(DateTime.GetYear(m_MaxDate),DateTime.GetMonth(m_MaxDate),DateTime.GetDayOfMonth(m_MaxDate))) Or (m_MinDate > 0 And DateUtils.SetDate(DateTime.GetYear(CurrentDay),DateTime.GetMonth(CurrentDay),DateTime.GetDayOfMonth(CurrentDay)) < DateUtils.SetDate(DateTime.GetYear(m_MinDate),DateTime.GetMonth(m_MinDate),DateTime.GetDayOfMonth(m_MinDate))) Then Return
 	
