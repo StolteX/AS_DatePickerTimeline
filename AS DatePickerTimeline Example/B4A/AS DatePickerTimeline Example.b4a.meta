@@ -10,6 +10,6 @@ ModuleClosedNodes0=6
 ModuleClosedNodes1=
 ModuleClosedNodes2=1
 ModuleClosedNodes3=1
-NavigationStack=AS_DatePickerTimeline,WeekDayClick,707,4,AS_DatePickerTimeline,Rebuild,477,0,AS_DatePickerTimeline,setEnabled,589,6,AS_DatePickerTimeline,getEnabled,584,3,AS_DatePickerTimeline,CustomDrawDay,583,0,Visual Designer,frm_main.bal,-100,1,B4XMainPage,CustomDrawDay,77,1,B4XMainPage,Class_Globals,10,0,B4XMainPage,B4XPage_Created,58,6,AS_DatePickerTimeline,Scroll2Date,452,2
+NavigationStack=B4XMainPage,CustomDrawDay,77,1,B4XMainPage,Class_Globals,10,0,AS_DatePickerTimeline,Class_Globals,111,0,AS_DatePickerTimeline,CreateDatePicker,502,0,Visual Designer,frm_main.bal,-100,6,AS_DatePickerTimeline,AddWeeks,506,6,B4XMainPage,B4XPage_Created,35,6
 SelectedBuild=0
 VisibleModules=2,1

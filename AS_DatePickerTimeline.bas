@@ -56,26 +56,52 @@ V1.15
 		-Completely rewritten logic
 		-Each day now has its own slot, instead of always adding 1 week to the list
 		-MinDate and MaxDate can now be used in a more targeted manner
+V1.16
+	-Add Designer Property CreateMode - If you set it to Manual then you need to call CreateDatePicker
+V1.17
+	-B4A BugFix
+V1.18
+	-Add Event PageChanged
+V1.19
+	-BugFix - The CustomDrawDayEvent is now also triggered when a different day is selected
+		-Old Day and New Day
+V1.20
+	-BugFixes
+	-Add Designer Property SelectedDateTextColor
+	-Add Designer Property SelectedMonthTextColor
+	-Add Designer Property SelectedWeekDayTextColor
+	-Add Designer Property ThemeChangeTransition
+	-Add set Theme
+	-Add get Theme_Light
+	-Add get Theme_Dark
 #End If
 
+#DesignerProperty: Key: ThemeChangeTransition, DisplayName: ThemeChangeTransition, FieldType: String, DefaultValue: Fade, List: None|Fade
+#DesignerProperty: Key: CreateMode, DisplayName: Create Mode, FieldType: String, DefaultValue: Automatic, List: Automatic|Manual , Description: If you set it to Manual then you need to call CreateDatePicker
 #DesignerProperty: Key: ListMode, DisplayName: List Mode, FieldType: String, DefaultValue: Paging, List: Paging|List
-#DesignerProperty: Key: BodyColor, DisplayName: Body Color, FieldType: Color, DefaultValue: 0xFF202125
 
-#DesignerProperty: Key: CurrentDateColor, DisplayName: Current Date Color, FieldType: Color, DefaultValue: 0xFF3C4043
-#DesignerProperty: Key: SelectedDateColor, DisplayName: Selected Date Color, FieldType: Color, DefaultValue: 0xFF4962A4
-#DesignerProperty: Key: DateTextColor, DisplayName: Date Text Color, FieldType: Color, DefaultValue: 0xFFFFFFFF
-#DesignerProperty: Key: MonthTextColor, DisplayName: Month Text Color, FieldType: Color, DefaultValue: 0xFFFFFFFF
-#DesignerProperty: Key: WeekDayTextColor, DisplayName: WeekDay Text Color, FieldType: Color, DefaultValue: 0xFFFFFFFF
+#DesignerProperty: Key: CurrentDateColor, DisplayName: Current Date Color, FieldType: Color, DefaultValue: 0xFF202125
+
+#DesignerProperty: Key: BodyColor, DisplayName: BodyColor, FieldType: Color, DefaultValue: 0xFF131416
+#DesignerProperty: Key: DateTextColor, DisplayName: DateTextColor, FieldType: Color, DefaultValue: 0xFFFFFFFF
+#DesignerProperty: Key: MonthTextColor, DisplayName: Month TextColor, FieldType: Color, DefaultValue: 0xFFFFFFFF
+#DesignerProperty: Key: WeekDayTextColor, DisplayName: WeekDay TextColor, FieldType: Color, DefaultValue: 0xFFFFFFFF
+
+#DesignerProperty: Key: SelectedDateColor, DisplayName: SelectedDateColor, FieldType: Color, DefaultValue: 0xFFFFFFFF
+#DesignerProperty: Key: SelectedDateTextColor, DisplayName: SelectedDateTextColor, FieldType: Color, DefaultValue: 0xFF000000
+#DesignerProperty: Key: SelectedMonthTextColor, DisplayName: SelectedMonthTextColor, FieldType: Color, DefaultValue: 0xFF000000
+#DesignerProperty: Key: SelectedWeekDayTextColor, DisplayName: SelectedWeekDayTextColor, FieldType: Color, DefaultValue: 0xFF000000
 
 #DesignerProperty: Key: FirstDayOfWeek, DisplayName: First Day of Week, FieldType: String, DefaultValue: Monday, List: Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday
 
 #Event: SelectedDateChanged (Date As Long)
 #Event: CustomDrawDay (Date As Long, Views As ASDatePickerTimeline_CustomDrawDay)
+#Event: PageChanged (FirstDay As Long, LastDay As Long)
 
 Sub Class_Globals
 	
-	Type ASDatePickerTimeline_SelectedDayProperties(Color As Int,CornerRadius As Float)
-	Type ASDatePickerTimeline_BodyProperties(DateTextColor As Int,DateTextFont As B4XFont,MonthTextColor As Int,MonthTextFont As B4XFont,WeekDayTextColor As Int,WeekDayTextFont As B4XFont)
+	Type ASDatePickerTimeline_SelectedDayProperties(Color As Int,CornerRadius As Float,DateTextColor As Int,MonthTextColor As Int,WeekDayTextColor As Int)
+	Type ASDatePickerTimeline_BodyProperties(BodyColor As Int,CurrentDateColor As Int,DateTextColor As Int,DateTextFont As B4XFont,MonthTextColor As Int,MonthTextFont As B4XFont,WeekDayTextColor As Int,WeekDayTextFont As B4XFont)
 	
 	Type ASDatePickerTimeline_MonthNameShort(January As String,February As String,March As String,April As String,May As String,June As String, July As String,August As String, September As String,October As String,November As String, December As String)
 	Type ASDatePickerTimeline_WeekNameShort(Monday As String,Tuesday As String,Wednesday As String,Thursday As String,Friday As String,Saturday As String,Sunday As String)
@@ -103,15 +129,92 @@ Sub Class_Globals
 	
 	Private xpnl_SelectedPanel As B4XView
 	
-	Private m_BodyColor As Int
+	Private m_CreateMode As String
 	Private m_ListMode As String
 	Private m_FirstDayOfWeek As Int = 5 'Monday
 	Private m_StartDate As Long
-	Private m_CurrentDateColor As Int
 	Private m_SelectedDate As Long
 	Private m_MinDate,m_MaxDate As Long
 	Private m_Enabled As Boolean = True
+	Private m_ThemeChangeTransition As String
+	
+	Private xiv_RefreshImage As B4XView
+	
+	Type ASDatePickerTimeline_Theme(Body_Color As Int,Body_CurrentDateColor As Int,Body_DateTextColor As Int,Body_MonthTextColor As Int,Body_WeekDayTextColor As Int,SelectedDay_Color As Int,SelectedDay_DateTextColor As Int,SelectedDay_MonthTextColor As Int,SelectedDay_WeekDayTextColor As Int)
+	
 End Sub
+
+Public Sub setTheme(Theme As ASDatePickerTimeline_Theme)
+	
+	xiv_RefreshImage.SetBitmap(mBase.Snapshot)
+	xiv_RefreshImage.SetVisibleAnimated(0,True)
+	
+	g_BodyProperties.BodyColor = Theme.Body_Color
+	g_BodyProperties.CurrentDateColor = Theme.Body_CurrentDateColor
+	g_BodyProperties.DateTextColor = Theme.Body_DateTextColor
+	g_BodyProperties.MonthTextColor = Theme.Body_MonthTextColor
+	g_BodyProperties.WeekDayTextColor = Theme.Body_WeekDayTextColor
+	
+	g_SelectedDayProperties.Color = Theme.SelectedDay_Color
+	g_SelectedDayProperties.DateTextColor = Theme.SelectedDay_DateTextColor
+	g_SelectedDayProperties.MonthTextColor = Theme.SelectedDay_MonthTextColor
+	g_SelectedDayProperties.WeekDayTextColor = Theme.SelectedDay_WeekDayTextColor
+	
+	Sleep(0)
+	
+	If m_ListMode = "Paging" Then xASVP_Main.LoadingPanelColor = g_BodyProperties.BodyColor
+	xpnl_LoadingPanel.Color = g_BodyProperties.BodyColor
+	Refresh
+	
+	Sleep(250)
+	
+	Select m_ThemeChangeTransition
+		Case "None"
+			xiv_RefreshImage.SetVisibleAnimated(0,False)
+		Case "Fade"
+			xiv_RefreshImage.SetVisibleAnimated(250,False)
+	End Select
+	
+End Sub
+
+Public Sub getTheme_Dark As ASDatePickerTimeline_Theme
+	
+	Dim Theme As ASDatePickerTimeline_Theme
+	Theme.Initialize
+	Theme.Body_Color = xui.Color_ARGB(255,19, 20, 22)
+	Theme.Body_CurrentDateColor = xui.Color_ARGB(255,32, 33, 37)
+	Theme.Body_DateTextColor = xui.Color_White
+	Theme.Body_MonthTextColor = xui.Color_White
+	Theme.Body_WeekDayTextColor = xui.Color_White
+	
+	Theme.SelectedDay_Color = xui.Color_White
+	Theme.SelectedDay_DateTextColor = xui.Color_Black
+	Theme.SelectedDay_MonthTextColor = xui.Color_Black
+	Theme.SelectedDay_WeekDayTextColor = xui.Color_Black
+	
+	Return Theme
+	
+End Sub
+
+Public Sub getTheme_Light As ASDatePickerTimeline_Theme
+	
+	Dim Theme As ASDatePickerTimeline_Theme
+	Theme.Initialize
+	Theme.Body_Color = xui.Color_White
+	Theme.Body_CurrentDateColor = 0xFFE9E9E9
+	Theme.Body_DateTextColor = xui.Color_Black
+	Theme.Body_MonthTextColor = xui.Color_Black
+	Theme.Body_WeekDayTextColor = xui.Color_Black
+	
+	Theme.SelectedDay_Color = xui.Color_Black
+	Theme.SelectedDay_DateTextColor = xui.Color_White
+	Theme.SelectedDay_MonthTextColor = xui.Color_White
+	Theme.SelectedDay_WeekDayTextColor = xui.Color_White
+	
+	Return Theme
+	
+End Sub
+
 
 Public Sub Initialize (Callback As Object, EventName As String)
 	mEventName = EventName
@@ -130,7 +233,7 @@ Public Sub DesignerCreateView (Base As Object, Lbl As Label, Props As Map)
 	mBase.AddView(xpnl_ListBackground,0,0,mBase.Width,mBase.Height)
 
 	xpnl_LoadingPanel = xui.CreatePanel("")
-	xpnl_LoadingPanel.Color = m_BodyColor
+	xpnl_LoadingPanel.Color = g_BodyProperties.BodyColor
 	mBase.AddView(xpnl_LoadingPanel,0,0,mBase.Width,mBase.Height)
 
 	If m_ListMode = "Paging" Then
@@ -140,7 +243,15 @@ Public Sub DesignerCreateView (Base As Object, Lbl As Label, Props As Map)
 		xpnl_LoadingPanel.Visible = True
 		ini_xclv
 	End If
-	AddWeeks
+	
+	xiv_RefreshImage = CreateImageView("")
+	xiv_RefreshImage.Visible = False
+	mBase.AddView(xiv_RefreshImage,0,0,mBase.Width,mBase.Height)
+	
+	If m_CreateMode = "Automatic" Then
+		AddWeeks
+	End If
+	
 	#If B4A
 	Base_Resize(mBase.Width,mBase.Height)
 	#End If
@@ -149,13 +260,13 @@ End Sub
 
 Private Sub IniProps(Props As Map)
 	
-	m_BodyColor = xui.PaintOrColorToColor(Props.Get("BodyColor"))
 	#If B4J
 	m_ListMode = "Paging"
 	#Else
 	m_ListMode = Props.Get("ListMode")
 	#End If
 	
+	m_CreateMode = Props.GetDefault("CreateMode","Automatic")
 	
 	If "Friday" = Props.Get("FirstDayOfWeek") Then
 		m_FirstDayOfWeek = 1
@@ -173,13 +284,27 @@ Private Sub IniProps(Props As Map)
 		m_FirstDayOfWeek = 7
 	End If
 	
-	m_CurrentDateColor = xui.PaintOrColorToColor(Props.GetDefault("CurrentDateColor",0xFF3C4043))
+	g_SelectedDayProperties.Initialize
+	g_SelectedDayProperties.CornerRadius = 10dip
+	g_SelectedDayProperties.Color = xui.PaintOrColorToColor(Props.GetDefault("SelectedDateColor",0xFF4962A4))
+	g_SelectedDayProperties.DateTextColor = xui.PaintOrColorToColor(Props.GetDefault("SelectedDateTextColor",0xFF000000))
+	g_SelectedDayProperties.WeekDayTextColor = xui.PaintOrColorToColor(Props.GetDefault("SelectedWeekDayTextColor",0xFF000000))
+	g_SelectedDayProperties.MonthTextColor = xui.PaintOrColorToColor(Props.GetDefault("SelectedMonthTextColor",0xFF000000))
 	
-	g_SelectedDayProperties = CreateASDatePickerTimeline_SelectedDayProperties(xui.PaintOrColorToColor(Props.GetDefault("SelectedDateColor",0xFF4962A4)),10dip)
-	g_BodyProperties = CreateASDatePickerTimeline_BodyProperties(xui.PaintOrColorToColor(Props.Get("DateTextColor")),xui.CreateDefaultBoldFont(20),xui.PaintOrColorToColor(Props.Get("MonthTextColor")),xui.CreateDefaultFont(12),xui.PaintOrColorToColor(Props.Get("WeekDayTextColor")),xui.CreateDefaultFont(12))
+	g_BodyProperties.Initialize
+	g_BodyProperties.BodyColor = xui.PaintOrColorToColor(Props.Get("BodyColor"))
+	g_BodyProperties.CurrentDateColor = xui.PaintOrColorToColor(Props.GetDefault("CurrentDateColor",0xFF3C4043))
+	g_BodyProperties.DateTextColor = xui.PaintOrColorToColor(Props.Get("DateTextColor"))
+	g_BodyProperties.DateTextFont = xui.CreateDefaultBoldFont(20)
+	g_BodyProperties.MonthTextColor = xui.PaintOrColorToColor(Props.Get("MonthTextColor"))
+	g_BodyProperties.MonthTextFont = xui.CreateDefaultFont(12)
+	g_BodyProperties.WeekDayTextColor = xui.PaintOrColorToColor(Props.Get("WeekDayTextColor"))
+	g_BodyProperties.WeekDayTextFont = xui.CreateDefaultFont(12)
 	
 	g_MonthNameShort = CreateASDatePickerTimeline_MonthNameShort("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec")
 	g_WeekNameShort = CreateASDatePickerTimeline_WeekNameShort("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+	
+	m_ThemeChangeTransition = Props.GetDefault("ThemeChangeTransition","Fade")
 	
 End Sub
 
@@ -195,7 +320,7 @@ Private Sub ini_viewpager
 	tmpmap.Put("LazyLoadingExtraSize",3)
 	xASVP_Main.Initialize(Me,"xASVP_Main")
 	xASVP_Main.DesignerCreateView(xpnl_ListBackground,tmplbl,tmpmap)
-	xASVP_Main.LoadingPanelColor = m_BodyColor
+	xASVP_Main.LoadingPanelColor = g_BodyProperties.BodyColor
 End Sub
 
 Private Sub ini_xclv
@@ -255,6 +380,11 @@ Private Sub Base_Resize (Width As Double, Height As Double)
 	End If
 End Sub
 
+'Only call this if you set the CreateMode in the designer to Manual!!!
+Public Sub CreateDatePicker
+	AddWeeks
+End Sub
+
 Private Sub AddWeeks
 	
 	Dim YearGap As Int = 3
@@ -303,17 +433,17 @@ Private Sub AddWeeks
 			LastStartDay = CurrentWeek
 	
 			Dim xpnl_Background As B4XView = xui.CreatePanel("")
-			xpnl_Background.Color = m_BodyColor
+			xpnl_Background.Color = g_BodyProperties.BodyColor
 			xpnl_Background.SetLayoutAnimated(0,0,0,xpnl_ListBackground.Width,xpnl_ListBackground.Height)
 		
 '		Log(DateUtils.TicksToString(CurrentWeek))
 '		Log(DateUtils.TicksToString(StartDateFirstDay))
 		
 			If DateUtils.IsSameDay(CurrentWeek,StartDateFirstDay) Then
-				StartIndex = i
+				StartIndex = Max(0,i)
 			End If
 		
-				xASVP_Main.AddPage(xpnl_Background,CurrentWeek)
+			xASVP_Main.AddPage(xpnl_Background,CurrentWeek)
 	
 		Next
 
@@ -321,7 +451,7 @@ Private Sub AddWeeks
 		
 		Dim DayCount As Int
 	
-		If m_MaxDate = 0 Then			
+		If m_MaxDate = 0 Then
 			DayCount = DateUtils.PeriodBetweenInDays(StartDate,DateUtils.SetDate(DateTime.GetYear(m_StartDate)+YearGap,12,31)).Days
 		Else
 			DayCount = Max(1,DateUtils.PeriodBetweenInDays(StartDate,m_MaxDate).Days) +1
@@ -339,24 +469,19 @@ Private Sub AddWeeks
 			LastStartDay = CurrentWeek
 			
 			Dim xpnl_Background As B4XView = xui.CreatePanel("")
-			xpnl_Background.Color = m_BodyColor
+			xpnl_Background.Color = g_BodyProperties.BodyColor
 			xpnl_Background.SetLayoutAnimated(0,0,0,mBase.Width/7,mBase.Height)
 			
 			If DateUtils.IsSameDay(CurrentWeek,m_StartDate) Then
-				StartIndex = i
-				StartIndex = StartIndex - DateTime.GetDayOfWeek(CurrentWeek) +1
-				StartIndex = IIf(StartIndex > DayCount,StartIndex -1,StartIndex)
+				StartIndex = Max(0,i)
+				StartIndex = Max(0,StartIndex - DateTime.GetDayOfWeek(CurrentWeek) +1)
+				StartIndex = Max(0,IIf(StartIndex > DayCount,StartIndex -1,StartIndex))
 			End If
 		
-
-				xclv_Main.Add(xpnl_Background,CurrentWeek)
-
-			
+			xclv_Main.Add(xpnl_Background,CurrentWeek)
 		Next
 
 	End If
-	
-
 	
 	#If B4A
 	'Sleep(250)
@@ -381,16 +506,12 @@ Private Sub AddWeeks
 		If xclv_Main.Size > 0 Then
 			xclv_Main.JumpToItem(StartIndex)
 		End If
+			#Else if B4A
+			#If Debug
+		Sleep(500)
 		#Else
-		
-		#If B4A
-		Do While xclv_Main.sv.ScrollViewOffsetX = 0 And xclv_Main.Size > 0 And StartIndex > 0
-			Sleep(0)
-			xclv_Main.sv.ScrollViewOffsetX = xclv_Main.GetRawListItem(StartIndex).Offset
-		Loop
-		Sleep(0)
+		Sleep(250)
 		#End If
-		
 		xclv_Main.sv.ScrollViewOffsetX = xclv_Main.GetRawListItem(StartIndex).Offset
 		
 		#End If
@@ -402,6 +523,7 @@ End Sub
 
 Private Sub AddWeek(Parent As B4XView,CurrentDate As Long)
 	
+	Parent.Color = g_BodyProperties.BodyColor
 	Dim BlockWidth As Float = IIf(m_ListMode = "Paging",Parent.Width/7,Parent.Width)
 	
 	Dim FirstDay As Long = GetFirstDayOfWeek2(CurrentDate,m_FirstDayOfWeek)
@@ -439,7 +561,11 @@ Private Sub AddWeek(Parent As B4XView,CurrentDate As Long)
 		Dim xlbl_Date As B4XView = CreateLabel("")
 		
 		xlbl_Date.Font = g_BodyProperties.DateTextFont
-		xlbl_Date.TextColor = g_BodyProperties.DateTextColor
+		If DateUtils.IsSameDay(m_SelectedDate,CurrentDay) Then
+			xlbl_Date.TextColor = g_SelectedDayProperties.DateTextColor
+		Else
+			xlbl_Date.TextColor = g_BodyProperties.DateTextColor
+		End If
 		xlbl_Date.SetTextAlignment("CENTER","CENTER")
 		xlbl_Date.Text = DateTime.GetDayOfMonth(CurrentDay)
 		xlbl_Date.Tag = "xlbl_Date"
@@ -450,7 +576,11 @@ Private Sub AddWeek(Parent As B4XView,CurrentDate As Long)
 		Dim xlbl_Month As B4XView = CreateLabel("")
 		xpnl_Date.AddView(xlbl_Month,0,0,BlockWidth,30dip)
 		xlbl_Month.Font = g_BodyProperties.MonthTextFont
-		xlbl_Month.TextColor = g_BodyProperties.MonthTextColor
+		If DateUtils.IsSameDay(m_SelectedDate,CurrentDay) Then
+			xlbl_Month.TextColor = g_SelectedDayProperties.MonthTextColor
+		Else
+			xlbl_Month.TextColor = g_BodyProperties.MonthTextColor
+		End If
 		xlbl_Month.SetTextAlignment("CENTER","CENTER")
 		xlbl_Month.Text = GetMonthNameByIndex(DateTime.GetMonth(CurrentDay))
 		xlbl_Month.Tag = "xlbl_Month"
@@ -458,13 +588,17 @@ Private Sub AddWeek(Parent As B4XView,CurrentDate As Long)
 		Dim xlbl_WeekDay As B4XView = CreateLabel("")
 		xpnl_Date.AddView(xlbl_WeekDay,0,xpnl_Date.Height - 30dip,BlockWidth,30dip)
 		xlbl_WeekDay.Font = g_BodyProperties.WeekDayTextFont
-		xlbl_WeekDay.TextColor = g_BodyProperties.WeekDayTextColor
+		If DateUtils.IsSameDay(m_SelectedDate,CurrentDay) Then
+			xlbl_WeekDay.TextColor = g_SelectedDayProperties.WeekDayTextColor
+		Else
+			xlbl_WeekDay.TextColor = g_BodyProperties.WeekDayTextColor
+		End If
 		xlbl_WeekDay.SetTextAlignment("CENTER","CENTER")
 		xlbl_WeekDay.Text = GetWeekNameByIndex(DateTime.GetDayOfWeek(CurrentDay))
 		xlbl_WeekDay.Tag = "xlbl_WeekDay"
 		
 		Dim xpnl_CurrentDay As B4XView = xui.CreatePanel("")
-		xpnl_CurrentDay.SetColorAndBorder(m_CurrentDateColor,0,0,g_SelectedDayProperties.CornerRadius)
+		xpnl_CurrentDay.SetColorAndBorder(g_BodyProperties.CurrentDateColor,0,0,g_SelectedDayProperties.CornerRadius)
 		xpnl_Date.AddView(xpnl_CurrentDay,0,0,xpnl_Date.Width,xpnl_Date.Height)
 		xpnl_CurrentDay.Tag = "xpnl_CurrentDay"
 		xpnl_CurrentDay.SendToBack
@@ -472,7 +606,7 @@ Private Sub AddWeek(Parent As B4XView,CurrentDate As Long)
 		CustomDrawDayIntern(CurrentDay,xpnl_Date)
 		
 		If DateUtils.IsSameDay(DateTime.Now,CurrentDay) = False Then xpnl_CurrentDay.Visible = False
-		If DateUtils.IsSameDay(m_SelectedDate,CurrentDay) = True Then WeekDayClick(xpnl_Date,False)
+		If DateUtils.IsSameDay(m_SelectedDate,CurrentDay) Then WeekDayClick(xpnl_Date,False)
 		
 	Next
 	
@@ -723,6 +857,8 @@ Public Sub PreviousWeek
 	End If
 End Sub
 'Will restrict date navigations features of forward, and also cannot swipe the control using touch gesture beyond the max date range
+'You need to call Rebuild
+'If you set this at app start, it is better to set the CreateMode in the designer to Manaul and then calling CreateDatePicker after you set the Max oder Min date
 Public Sub setMaxDate(MaxDate As Long)
 	m_MaxDate = MaxDate
 End Sub
@@ -730,6 +866,8 @@ Public Sub getMaxDate As Long
 	Return m_MaxDate
 End Sub
 'Will restrict date navigations features of backward, also cannot swipe the control using touch gesture beyond the min date range
+'You need to call Rebuild
+'If you set this at app start, it is better to set the CreateMode in the designer to Manaul and then calling CreateDatePicker after you set the Max oder Min date
 Public Sub setMinDate(MinDate As Long)
 	m_MinDate = MinDate
 End Sub
@@ -754,6 +892,7 @@ End Sub
 #Region ViewEvents
 'https://www.b4x.com/android/forum/threads/b4x-xui-customlistview-lazy-loading-virtualization.87930/#content
 Private Sub xclv_main_VisibleRangeChanged (FirstIndex As Int, LastIndex As Int)
+	PageChanged(xclv_Main.GetValue(xclv_Main.FirstVisibleIndex+1),xclv_Main.GetValue(xclv_Main.LastVisibleIndex-1))
 	Dim ExtraSize As Int = 10
 	For i = 0 To xclv_Main.Size - 1
 		Dim p As B4XView = xclv_Main.GetPanel(i)
@@ -775,6 +914,9 @@ Private Sub xASVP_Main_LazyLoadingAddContent(Parent As B4XView, Value As Object)
 	AddWeek(Parent,Value)
 End Sub
 
+Private Sub xASVP_Main_PageChanged(Index As Int)
+	PageChanged(xASVP_Main.GetValue(xASVP_Main.CurrentIndex),xASVP_Main.GetValue(xASVP_Main.CurrentIndex)+DateTime.TicksPerDay*6)
+End Sub
 
 #If B4J
 Private Sub xpnl_WeekDay_MouseClicked (EventData As MouseEvent)
@@ -789,18 +931,49 @@ Private Sub WeekDayClick(xpnl_WeekDay As B4XView,WithEvent As Boolean)
 	Dim CurrentDay As Long = xpnl_WeekDay.Tag
 	If (m_MaxDate > 0 And DateUtils.SetDate(DateTime.GetYear(CurrentDay),DateTime.GetMonth(CurrentDay),DateTime.GetDayOfMonth(CurrentDay)) > DateUtils.SetDate(DateTime.GetYear(m_MaxDate),DateTime.GetMonth(m_MaxDate),DateTime.GetDayOfMonth(m_MaxDate))) Or (m_MinDate > 0 And DateUtils.SetDate(DateTime.GetYear(CurrentDay),DateTime.GetMonth(CurrentDay),DateTime.GetDayOfMonth(CurrentDay)) < DateUtils.SetDate(DateTime.GetYear(m_MinDate),DateTime.GetMonth(m_MinDate),DateTime.GetDayOfMonth(m_MinDate))) Then Return
 	
-	If xpnl_SelectedPanel.IsInitialized = True Then xpnl_SelectedPanel.RemoveViewFromParent
+	Dim LastParent As B4XView
+	If xpnl_SelectedPanel.IsInitialized = True Then
+		LastParent = xpnl_SelectedPanel.Parent
+		
+		For Each View As B4XView In LastParent.GetAllViewsRecursive
+		
+			Select View.Tag
+				Case "xlbl_WeekDay"
+					View.TextColor = g_BodyProperties.WeekDayTextColor
+				Case "xlbl_Month"
+					View.TextColor = g_BodyProperties.MonthTextColor
+				Case "xlbl_Date"
+					View.TextColor = g_BodyProperties.DateTextColor
+			End Select
+		
+		Next
+		
+		xpnl_SelectedPanel.RemoveViewFromParent
+	End If
 	xpnl_SelectedPanel = xui.CreatePanel("")
 	xpnl_SelectedPanel.SetColorAndBorder(g_SelectedDayProperties.Color,0,0,g_SelectedDayProperties.CornerRadius)
 	xpnl_WeekDay.AddView(xpnl_SelectedPanel,0,0,xpnl_WeekDay.Width,xpnl_WeekDay.Height)
 	xpnl_SelectedPanel.SendToBack
 	For Each View As B4XView In xpnl_WeekDay.GetAllViewsRecursive
-		If "xpnl_CurrentDay" = View.Tag Then
-			View.SendToBack
-		End If
+		
+		Select View.Tag
+			Case "xpnl_CurrentDay"
+				View.SendToBack
+			Case "xlbl_WeekDay"
+				View.TextColor = g_SelectedDayProperties.WeekDayTextColor
+			Case "xlbl_Month"
+				View.TextColor = g_SelectedDayProperties.MonthTextColor
+			Case "xlbl_Date"
+				View.TextColor = g_SelectedDayProperties.DateTextColor
+		End Select
+		
 	Next
+	
 	m_SelectedDate = xpnl_WeekDay.Tag
 	If WithEvent = True Then SelectedDateChanged(xpnl_WeekDay.Tag)
+	
+	If LastParent.IsInitialized Then CustomDrawDayIntern(LastParent.Tag,LastParent)
+	CustomDrawDayIntern(CurrentDay,xpnl_WeekDay)
 End Sub
 
 #End Region
@@ -810,6 +983,12 @@ End Sub
 Private Sub SelectedDateChanged(date As Long)
 	If xui.SubExists(mCallBack, mEventName & "_SelectedDateChanged", 1) Then
 		CallSub2(mCallBack, mEventName & "_SelectedDateChanged",date)
+	End If
+End Sub
+
+Private Sub PageChanged(FirstDate As Long,LastDate As Long)
+	If xui.SubExists(mCallBack, mEventName & "_PageChanged", 2) Then
+		CallSub3(mCallBack, mEventName & "_PageChanged",FirstDate,LastDate)
 	End If
 End Sub
 
@@ -920,6 +1099,12 @@ Private Sub CreateLabel(EventName As String) As B4XView
 	Return lbl
 End Sub
 
+Private Sub CreateImageView(EventName As String) As B4XView
+	Dim iv As ImageView
+	iv.Initialize(EventName)
+	Return iv
+End Sub
+
 #End Region
 
 #Region Types
@@ -955,24 +1140,11 @@ Public Sub CreateASDatePickerTimeline_WeekNameShort (Monday As String, Tuesday A
 	Return t1
 End Sub
 
-Public Sub CreateASDatePickerTimeline_SelectedDayProperties (Color As Int, CornerRadius As Float) As ASDatePickerTimeline_SelectedDayProperties
-	Dim t1 As ASDatePickerTimeline_SelectedDayProperties
-	t1.Initialize
-	t1.Color = Color
-	t1.CornerRadius = CornerRadius
-	Return t1
-End Sub
-
-Public Sub CreateASDatePickerTimeline_BodyProperties (DateTextColor As Int, DateTextFont As B4XFont, MonthTextColor As Int, MonthTextFont As B4XFont, WeekDayTextColor As Int, WeekDayTextFont As B4XFont) As ASDatePickerTimeline_BodyProperties
-	Dim t1 As ASDatePickerTimeline_BodyProperties
-	t1.Initialize
-	t1.DateTextColor = DateTextColor
-	t1.DateTextFont = DateTextFont
-	t1.MonthTextColor = MonthTextColor
-	t1.MonthTextFont = MonthTextFont
-	t1.WeekDayTextColor = WeekDayTextColor
-	t1.WeekDayTextFont = WeekDayTextFont
-	Return t1
-End Sub
-
 #End Region
+
+
+
+
+
+
+

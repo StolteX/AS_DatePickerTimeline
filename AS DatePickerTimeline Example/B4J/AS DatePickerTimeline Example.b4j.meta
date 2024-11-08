@@ -7,6 +7,6 @@ ModuleBreakpoints2=
 ModuleClosedNodes0=1,4
 ModuleClosedNodes1=
 ModuleClosedNodes2=1
-NavigationStack=AS_DatePickerTimeline,Class_Globals,64,5,AS_DatePickerTimeline,Rebuild,442,3,AS_DatePickerTimeline,AddWeeks,301,2,B4XMainPage,Class_Globals,11,0,B4XMainPage,CustomDrawDay,83,0,AS_DatePickerTimeline,Refresh,427,0,AS_DatePickerTimeline,Scroll2Date,445,0,Visual Designer,frm_main.bjl,-100,6,B4XMainPage,B4XPage_Created,41,1,AS_DatePickerTimeline,CustomDrawDay,524,0
+NavigationStack=AS_DatePickerTimeline,DesignerCreateView,223,0,AS_DatePickerTimeline,ini_viewpager,311,0,AS_DatePickerTimeline,Base_Resize,360,0,AS_DatePickerTimeline,IniProps,252,6,AS_DatePickerTimeline,Refresh,619,0,AS_DatePickerTimeline,AddWeek,511,3,AS_DatePickerTimeline,setTheme,150,6,B4XMainPage,AS_DatePickerTimeline2_PageChanged,58,0,B4XMainPage,Class_Globals,10,0,B4XMainPage,B4XPage_Created,23,6
 SelectedBuild=0
 VisibleModules=2,1

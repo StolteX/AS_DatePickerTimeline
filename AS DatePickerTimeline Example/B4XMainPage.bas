@@ -29,41 +29,6 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 	
 	B4XPages.SetTitle(Me,"AS DatePickerTimeline")
 
-'	Sleep(4000)
-'	'AS_DatePickerTimeline1.CustomDrawDay(DateTime.Now).xlbl_Date.TextColor = xui.Color_Red
-'	Dim CustomDrawDay1 As ASDatePickerTimeline_CustomDrawDay = AS_DatePickerTimeline2.CustomDrawDay(DateTime.Now + DateTime.TicksPerDay*500)
-'	If CustomDrawDay1.xlbl_Date.IsInitialized = True Then
-'		CustomDrawDay1.xlbl_Date.TextColor = xui.Color_Red
-'	End If
-	'
-'	Sleep(4000)
-'	AS_DatePickerTimeline1.BodyProperties.DateTextColor = xui.Color_Red
-'	AS_DatePickerTimeline2.BodyProperties.DateTextColor = xui.Color_Red
-'	Log("lul")
-'	AS_DatePickerTimeline1.Refresh
-'	AS_DatePickerTimeline2.Refresh
-'	Sleep(2000)
-'	Log("lul2")
-'	AS_DatePickerTimeline1.Refresh
-'	AS_DatePickerTimeline2.Refresh
-
-'	AS_DatePickerTimeline1.MinDate = DateTime.now
-'	AS_DatePickerTimeline2.MinDate = DateTime.now
-	'
-'	AS_DatePickerTimeline1.MaxDate = DateTime.now
-'	AS_DatePickerTimeline2.MaxDate = DateTime.now
-	'
-'	AS_DatePickerTimeline1.Rebuild
-'	AS_DatePickerTimeline2.Rebuild
-
-'	AS_DatePickerTimeline2.MinDate = DateUtils.SetDate(DateTime.GetYear(DateTime.now), 1, 1)
-'	AS_DatePickerTimeline2.MaxDate = DateUtils.SetDate(2022, 8, 16)
-'	AS_DatePickerTimeline2.Rebuild
-
-Sleep(4000)
-	AS_DatePickerTimeline1.Scroll2Date(DateTime.Now + DateTime.TicksPerDay*7)
-	AS_DatePickerTimeline2.Scroll2Date(DateTime.Now + DateTime.TicksPerDay*7)
-
 End Sub
 
 
@@ -77,11 +42,6 @@ End Sub
 
 Private Sub AS_DatePickerTimeline2_CustomDrawDay (Date As Long, Views As ASDatePickerTimeline_CustomDrawDay)
 	CustomDrawDay(Date,Views)
-
-'	If (AS_DatePickerTimeline2.MaxDate > 0 And DateUtils.SetDate(DateTime.GetYear(Date),DateTime.GetMonth(Date),DateTime.GetDayOfMonth(Date)) > DateUtils.SetDate(DateTime.GetYear(AS_DatePickerTimeline2.MaxDate),DateTime.GetMonth(AS_DatePickerTimeline2.MaxDate),DateTime.GetDayOfMonth(AS_DatePickerTimeline2.MaxDate))) Or (AS_DatePickerTimeline2.MinDate > 0 And DateUtils.SetDate(DateTime.GetYear(Date),DateTime.GetMonth(Date),DateTime.GetDayOfMonth(Date)) < DateUtils.SetDate(DateTime.GetYear(AS_DatePickerTimeline2.MinDate),DateTime.GetMonth(AS_DatePickerTimeline2.MinDate),DateTime.GetDayOfMonth(AS_DatePickerTimeline2.MinDate))) Then
-'		Views.xlbl_Date.TextColor = xui.Color_ARGB(80,255,255,255)
-'	End If
-'	
 End Sub
 
 Private Sub CustomDrawDay (Date As Long, Views As ASDatePickerTimeline_CustomDrawDay)
@@ -91,3 +51,14 @@ Private Sub CustomDrawDay (Date As Long, Views As ASDatePickerTimeline_CustomDra
 	End If
 	
 End Sub
+
+Private Sub AS_DatePickerTimeline1_PageChanged (FirstDay As Long, LastDay As Long)
+	Log("FirstDay: " & DateUtils.TicksToString(FirstDay))
+	Log("LastDay: " & DateUtils.TicksToString(LastDay))
+End Sub
+
+Private Sub AS_DatePickerTimeline2_PageChanged (FirstDay As Long, LastDay As Long)
+	Log("FirstDay: " & DateUtils.TicksToString(FirstDay))
+	Log("LastDay: " & DateUtils.TicksToString(LastDay))
+End Sub
+
