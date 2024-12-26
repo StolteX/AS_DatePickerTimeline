@@ -74,6 +74,8 @@ V1.20
 	-Add set Theme
 	-Add get Theme_Light
 	-Add get Theme_Dark
+V1.21
+	-BugFix
 #End If
 
 #DesignerProperty: Key: ThemeChangeTransition, DisplayName: ThemeChangeTransition, FieldType: String, DefaultValue: Fade, List: None|Fade
@@ -937,7 +939,7 @@ Private Sub WeekDayClick(xpnl_WeekDay As B4XView,WithEvent As Boolean)
 		
 		For Each View As B4XView In LastParent.GetAllViewsRecursive
 		
-			Select View.Tag
+			Select View.Tag.As(String)
 				Case "xlbl_WeekDay"
 					View.TextColor = g_BodyProperties.WeekDayTextColor
 				Case "xlbl_Month"
@@ -956,7 +958,7 @@ Private Sub WeekDayClick(xpnl_WeekDay As B4XView,WithEvent As Boolean)
 	xpnl_SelectedPanel.SendToBack
 	For Each View As B4XView In xpnl_WeekDay.GetAllViewsRecursive
 		
-		Select View.Tag
+		Select View.Tag.As(String)
 			Case "xpnl_CurrentDay"
 				View.SendToBack
 			Case "xlbl_WeekDay"
