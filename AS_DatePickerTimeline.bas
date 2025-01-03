@@ -76,6 +76,8 @@ V1.20
 	-Add get Theme_Dark
 V1.21
 	-BugFix
+V1.22
+	-BugFix If the selected day is recreated in LazyLoading, a crash occurs because a view was not initialized
 #End If
 
 #DesignerProperty: Key: ThemeChangeTransition, DisplayName: ThemeChangeTransition, FieldType: String, DefaultValue: Fade, List: None|Fade
@@ -937,18 +939,20 @@ Private Sub WeekDayClick(xpnl_WeekDay As B4XView,WithEvent As Boolean)
 	If xpnl_SelectedPanel.IsInitialized = True Then
 		LastParent = xpnl_SelectedPanel.Parent
 		
-		For Each View As B4XView In LastParent.GetAllViewsRecursive
+		If LastParent.IsInitialized Then
+			For Each View As B4XView In LastParent.GetAllViewsRecursive
 		
-			Select View.Tag.As(String)
-				Case "xlbl_WeekDay"
-					View.TextColor = g_BodyProperties.WeekDayTextColor
-				Case "xlbl_Month"
-					View.TextColor = g_BodyProperties.MonthTextColor
-				Case "xlbl_Date"
-					View.TextColor = g_BodyProperties.DateTextColor
-			End Select
+				Select View.Tag.As(String)
+					Case "xlbl_WeekDay"
+						View.TextColor = g_BodyProperties.WeekDayTextColor
+					Case "xlbl_Month"
+						View.TextColor = g_BodyProperties.MonthTextColor
+					Case "xlbl_Date"
+						View.TextColor = g_BodyProperties.DateTextColor
+				End Select
 		
-		Next
+			Next
+		End If
 		
 		xpnl_SelectedPanel.RemoveViewFromParent
 	End If
