@@ -78,6 +78,9 @@ V1.21
 	-BugFix
 V1.22
 	-BugFix If the selected day is recreated in LazyLoading, a crash occurs because a view was not initialized
+V1.23
+	-BugFixes
+	-New get LoadingPanel
 #End If
 
 #DesignerProperty: Key: ThemeChangeTransition, DisplayName: ThemeChangeTransition, FieldType: String, DefaultValue: Fade, List: None|Fade
@@ -166,7 +169,6 @@ Public Sub setTheme(Theme As ASDatePickerTimeline_Theme)
 	
 	Sleep(0)
 	
-	If m_ListMode = "Paging" Then xASVP_Main.LoadingPanelColor = g_BodyProperties.BodyColor
 	xpnl_LoadingPanel.Color = g_BodyProperties.BodyColor
 	Refresh
 	
@@ -241,10 +243,8 @@ Public Sub DesignerCreateView (Base As Object, Lbl As Label, Props As Map)
 	mBase.AddView(xpnl_LoadingPanel,0,0,mBase.Width,mBase.Height)
 
 	If m_ListMode = "Paging" Then
-		xpnl_LoadingPanel.Visible = False
 		ini_viewpager
 	Else
-		xpnl_LoadingPanel.Visible = True
 		ini_xclv
 	End If
 	
@@ -324,7 +324,7 @@ Private Sub ini_viewpager
 	tmpmap.Put("LazyLoadingExtraSize",3)
 	xASVP_Main.Initialize(Me,"xASVP_Main")
 	xASVP_Main.DesignerCreateView(xpnl_ListBackground,tmplbl,tmpmap)
-	xASVP_Main.LoadingPanelColor = g_BodyProperties.BodyColor
+	xASVP_Main.LoadingPanelColor = xui.Color_Transparent
 End Sub
 
 Private Sub ini_xclv
@@ -519,8 +519,9 @@ Private Sub AddWeeks
 		xclv_Main.sv.ScrollViewOffsetX = xclv_Main.GetRawListItem(StartIndex).Offset
 		
 		#End If
-		xpnl_LoadingPanel.SetVisibleAnimated(250,False)
+	
 	End If
+	xpnl_LoadingPanel.SetVisibleAnimated(250,False)
 	Sleep(0)
 	m_isReady = True
 End Sub
@@ -794,6 +795,11 @@ Public Sub CustomDrawDay(Date As Long) As ASDatePickerTimeline_CustomDrawDay
 End Sub
 
 #Region Properties
+
+Public Sub getLoadingPanel As B4XView
+	Return xpnl_LoadingPanel
+End Sub
+
 'If False then click events and scroll (only on paging mode) is disabled 
 Public Sub getEnabled As Boolean
 	Return m_Enabled
@@ -806,6 +812,7 @@ Public Sub setEnabled(Enable As Boolean)
 	End If
 End Sub
 
+'Call Refresh if you change something
 Public Sub getSelectedDate As Long
 	Return m_SelectedDate
 End Sub
